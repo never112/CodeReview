@@ -428,11 +428,6 @@ function showLanguage(lang) {
   }
 }
 
-// Auto-detect browser language
-const browserLang = navigator.language || navigator.userLanguage;
-if (browserLang.startsWith('zh')) {
-  showLanguage('zh');
-} else {
-  showLanguage('en');
-}
+// Default to Chinese
+showLanguage('zh');
 </script>
