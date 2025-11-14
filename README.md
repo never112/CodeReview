@@ -1,10 +1,7 @@
 # Code Review Bot / 代码审查机器人
 
-[English](#english) | [中文](#中文)
-
----
-
-## English
+<div id="en-content">
+<h2>English</h2>
 
 A Go-based webhook server that automatically performs code reviews on GitHub pull requests and posts results back as comments.
 
@@ -205,10 +202,10 @@ Returns: `{"status":"ok"}`
 #### License
 
 This project is licensed under the MIT License.
+</div>
 
----
-
-## 中文
+<div id="zh-content" style="display: none;">
+<h2>中文</h2>
 
 一个基于 Go 语言的 webhook 服务器，可以自动对 GitHub 拉取请求进行代码审查，并将审查结果作为评论发布到 PR 上。
 
@@ -409,3 +406,33 @@ GET /health
 #### 许可证
 
 本项目采用 MIT 许可证。
+</div>
+
+---
+
+**Language / 语言:**
+<button onclick="showLanguage('en')">English</button> |
+<button onclick="showLanguage('zh')">中文</button>
+
+<script>
+function showLanguage(lang) {
+  const enContent = document.getElementById('en-content');
+  const zhContent = document.getElementById('zh-content');
+
+  if (lang === 'en') {
+    enContent.style.display = 'block';
+    zhContent.style.display = 'none';
+  } else {
+    enContent.style.display = 'none';
+    zhContent.style.display = 'block';
+  }
+}
+
+// Auto-detect browser language
+const browserLang = navigator.language || navigator.userLanguage;
+if (browserLang.startsWith('zh')) {
+  showLanguage('zh');
+} else {
+  showLanguage('en');
+}
+</script>
