@@ -7,10 +7,10 @@ import (
 )
 
 type Config struct {
-	Server   ServerConfig
-	GitHub   GitHubConfig
-	Review   ReviewConfig
-	WorkDir  string
+	Server  ServerConfig
+	GitHub  GitHubConfig
+	Review  ReviewConfig
+	WorkDir string
 }
 
 type ServerConfig struct {
@@ -18,8 +18,8 @@ type ServerConfig struct {
 }
 
 type GitHubConfig struct {
-	WebhookSecret     string
-	Token             string
+	WebhookSecret string
+	Token         string
 }
 
 type ReviewConfig struct {
