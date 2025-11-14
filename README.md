@@ -1,6 +1,6 @@
 # Code Review Bot / 代码审查机器人
 
-<div id="en-content">
+<div id="en-content" style="display: none;">
 <h2>English</h2>
 
 A Go-based webhook server that automatically performs code reviews on GitHub pull requests and posts results back as comments.
@@ -204,7 +204,7 @@ Returns: `{"status":"ok"}`
 This project is licensed under the MIT License.
 </div>
 
-<div id="zh-content" style="display: none;">
+<div id="zh-content">
 <h2>中文</h2>
 
 一个基于 Go 语言的 webhook 服务器，可以自动对 GitHub 拉取请求进行代码审查，并将审查结果作为评论发布到 PR 上。
