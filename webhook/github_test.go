@@ -24,6 +24,7 @@ func NewCommentClient1(token string) *github.Client {
 
 func TestTest123(t *testing.T) {
 	token := os.Getenv("GITHUB_TOKEN")
+	log.Printf("token: %s", token)
 	body := "xxxxxxxxxxxxxabcdsdcsddcsd"
 
 	ctx := context.Background()

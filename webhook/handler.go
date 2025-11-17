@@ -178,6 +178,9 @@ func NewCommentClient(token string) *github.Client {
 	return github.NewClient(tc)
 }
 func (h *Handler) postReviewComment(ctx context.Context, event PullRequestEvent, reviewResult string) error {
+	gev := os.Getenv("GITHUB_TEST_ENV")
+	log.Printf("%v", gev)
+
 	comment := &github.IssueComment{
 		Body: github.String(fmt.Sprintf("## 🤖 Code Review Results\n\n%s", reviewResult)),
 	}
