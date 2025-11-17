@@ -1,4 +1,4 @@
-# Code Review Bot / 代码审查机器人
+# 代码审查机器人
 
 <div id="en-content" style="display: none;">
 <h2>English</h2>
@@ -207,205 +207,332 @@ This project is licensed under the MIT License.
 <div id="zh-content">
 <h2>中文</h2>
 
-一个基于 Go 语言的 webhook 服务器，可以自动对 GitHub 拉取请求进行代码审查，并将审查结果作为评论发布到 PR 上。
+一个基于 Go 语言的智能代码审查机器人，专为 GitHub 拉取请求设计。该机器人集成了 Claude Code AI 审查功能，能够自动分析代码质量并提供专业的中文审查报告。
 
-### 功能特点
+## 项目概述
 
-- 🤖 监听 GitHub 拉取请求的 webhook 事件
-- 📥 当 PR 创建或更新时自动克隆仓库代码
-- 🔍 执行可配置的审查命令（默认为 `/review`）
-- 💬 将审查结果作为格式化评论发布到拉取请求上
-- 🔧 使用 GitHub 个人访问令牌进行身份验证
-- 📊 提供详细的审查输出和文件分析
+该项目是一个现代化的自动化代码审查解决方案，通过 GitHub webhook 机制实现实时代码质量监控。系统采用模块化设计，支持多种代码审查工具，并默认集成 Claude Code AI 智能审查功能。
 
-### 安装设置
+### 核心功能
 
-#### 环境要求
+- 🤖 **智能监听**：自动响应 GitHub PR 的 `opened`、`synchronize`、`reopened` 事件
+- 📥 **自动克隆**：智能获取 PR 源码，支持分支切换和版本管理
+- 🔍 **AI 驱动审查**：默认集成 Claude Code，支持多维度代码质量分析
+- 💬 **专业评论**：生成结构化的中文审查报告，包含代码建议和改进方案
+- 🔧 **安全认证**：采用 GitHub Personal Access Token 和 Webhook 签名双重验证
+- 📊 **详细分析**：提供文件类型统计、执行时间监控和审查覆盖率分析
 
-- Go 1.21 或更高版本
-- Git
-- 可以通过 `/review` 命令执行的代码审查工具或脚本
+### 技术架构
 
-#### 安装步骤
-
-1. 克隆仓库：
-```bash
-git clone <repository-url>
-cd code-review
+```
+CodeReview/
+├── main.go          # 主程序入口，服务器启动和路由配置
+├── config/          # 配置管理模块，环境变量处理
+├── webhook/         # Webhook 事件处理器，GitHub API 交互
+├── review/          # 代码审查执行引擎
+├── git/            # Git 操作模块，仓库克隆和清理
+├── prompt/         # AI 审查提示词模板
+└── utils/          # 工具函数库
 ```
 
-2. 安装依赖：
+## 快速开始
+
+### 环境要求
+
+- **Go 1.24+**（项目使用最新 Go 版本）
+- **Git** 版本控制工具
+- **Claude Code CLI**（用于 AI 驱动的代码审查）
+- **GitHub Personal Access Token**（需要仓库访问权限）
+
+### 安装部署
+
+1. **克隆项目**
 ```bash
-go mod tidy
-go mod download
+git clone https://github.com/your-username/CodeReview.git
+cd CodeReview
 ```
 
-3. 构建应用：
+2. **依赖管理**
 ```bash
-go build -o code-review .
+go mod tidy    # 下载并整理依赖
+go mod download # 验证依赖完整性
 ```
 
-#### 配置说明
-
-应用可以通过环境变量进行配置：
-
-**必需配置**
-
-- **`GITHUB_TOKEN`**: 具有仓库访问权限的 GitHub 个人访问令牌
-- **`GITHUB_WEBHOOK_SECRET`**: GitHub webhook 密钥（用于 webhook 签名验证）
-
-**可选配置**
-
-- **`PORT`**: 服务器端口（默认：8080）
-- **`REVIEW_COMMAND`**: 执行代码审查的命令（默认：`/review`）
-- **`REVIEW_TIMEOUT`**: 审查超时时间，单位秒（默认：300）
-- **`WORK_DIR`**: 克隆仓库的工作目录（默认：`/tmp/code-review`）
-
-#### 身份验证
-
-应用使用 GitHub 个人访问令牌进行身份验证：
-
+3. **编译构建**
 ```bash
-export GITHUB_TOKEN="你的github个人访问令牌"
-export GITHUB_WEBHOOK_SECRET="你的webhook密钥"
-```
-
-创建 GitHub 个人访问令牌的步骤：
-1. 访问 GitHub 设置 → 开发者设置 → 个人访问令牌 → 令牌（经典）
-2. 点击 "Generate new token (classic)"
-3. 选择权限范围：`repo`（用于私有仓库）和 `public_repo`（用于公开仓库）
-4. 生成令牌并妥善保存
-
-#### 设置 GitHub Webhook
-
-1. 进入你的 GitHub 仓库设置 → Webhooks
-2. 点击 "Add webhook"
-3. 设置 **Payload URL** 为：`http://your-server-url:8080/webhook`
-4. 设置 **Content type** 为 `application/json`
-5. 设置 **Secret** 为你的 webhook 密钥
-6. 选择 "Let me select individual events"
-7. 勾选 "Pull requests"
-8. 点击 "Add webhook"
-
-#### 运行应用
-
-**开发环境**
-```bash
+# 开发版本
 go run main.go
-```
 
-**生产环境**
-```bash
+# 生产版本
+go build -o code-review .
 ./code-review
 ```
 
-服务器将在端口 8080（或你配置的端口）上启动。
+## 配置指南
 
-#### 自定义审查命令
+### 必需配置项
 
-机器人会在克隆的仓库目录中执行 `REVIEW_COMMAND` 环境变量指定的命令。你可以自定义此命令来运行任何代码审查工具。
-
-**示例**
-
-使用 Claude Code（根据需求要求）：
 ```bash
-export REVIEW_COMMAND="claude /review"
+# GitHub 个人访问令牌（需要 repo 权限）
+export GITHUB_TOKEN="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+# Webhook 签名密钥（用于验证请求来源）
+export GITHUB_WEBHOOK_SECRET="your-webhook-secret-key"
 ```
 
-使用自定义脚本：
+### 可选配置项
+
 ```bash
-export REVIEW_COMMAND="./scripts/my-review.sh"
+# 服务器端口（默认：8080）
+export PORT="8080"
+
+# 自定义审查命令（已内置 Claude Code 配置）
+export REVIEW_COMMAND="claude /review --system-prompt review时候参考prompt/review.md文件,review时参考prompt/baseReview.md文件,IMPORTANT: 请使用中文进行review结果展示 --dangerously-skip-permissions"
+
+# 审查超时时间，单位秒（默认：300秒）
+export REVIEW_TIMEOUT="300"
+
+# 临时工作目录（默认：/tmp/code-review）
+export WORK_DIR="/var/tmp/code-review"
 ```
 
-使用多个工具：
+### GitHub Personal Access Token 创建
+
+1. 访问 [GitHub Settings](https://github.com/settings/tokens)
+2. 选择 **Generate new token (classic)**
+3. 配置权限范围：
+   - ✅ `repo` - 访问私有仓库
+   - ✅ `public_repo` - 访问公开仓库
+   - ✅ `issues:write` - 创建评论权限
+4. 生成并安全保存令牌
+
+## GitHub Webhook 配置
+
+### 创建 Webhook
+
+1. 进入目标仓库 → **Settings** → **Webhooks**
+2. 点击 **Add webhook**
+3. 配置参数：
+   - **Payload URL**: `http://your-server:8080/webhook`
+   - **Content type**: `application/json`
+   - **Secret**: 与 `GITHUB_WEBHOOK_SECRET` 相同
+   - **Events**: 选择 **"Let me select individual events"**
+   - 勾选 **"Pull requests"**
+
+### 事件响应
+
+机器人监听以下 PR 事件：
+- `pull_request.opened` - 新 PR 创建时
+- `pull_request.synchronize` - PR 新提交推送时
+- `pull_request.reopened` - PR 重新开启时
+
+## AI 审查配置
+
+### 审查提示词模板
+
+项目提供专业的 AI 审查提示词：
+
+**`prompt/review.md`** - 代码审查标准
+- 环境变量获取规范
+- 默认值设置要求
+- 注释说明规范
+
+**`prompt/baseReview.md`** - 多维度审查策略
+- 代码质量审查
+- 性能优化建议
+- 文档准确性检查
+- 安全性扫描
+
+### 自定义审查命令
+
+**使用 Claude Code（推荐）**：
 ```bash
-export REVIEW_COMMAND="eslint . && go vet ./... && mypy ."
+export REVIEW_COMMAND="claude /review --system-prompt $(cat prompt/review.md) --dangerously-skip-permissions"
 ```
 
-#### Webhook 事件
+**集成多种工具**：
+```bash
+export REVIEW_COMMAND="eslint . && go vet ./... && mypy . && claude /review"
+```
 
-机器人响应以下事件：
-- `pull_request.opened` - 创建新的 PR 时
-- `pull_request.synchronize` - 向现有 PR 推送新提交时
+**使用自定义脚本**：
+```bash
+export REVIEW_COMMAND="./scripts/custom-review.sh"
+```
 
-#### 审查输出示例
+## 审查报告示例
 
-机器人会发布如下格式的评论：
+机器人会生成如下格式的专业审查报告：
 
 ```markdown
 ## 🤖 代码审查结果
 
-**审查命令：** `claude /review`
-**执行时间：** 2分15秒
-**退出代码：** 0
-
 ### 📋 审查输出
 
-```
-代码质量很好！未发现问题。
-```
+#### 代码质量分析
+- 发现 3 个潜在问题需要修复
+- 建议 2 处性能优化点
+- 代码结构良好，可读性强
+
+#### 安全检查
+- ✅ 未发现明显安全漏洞
+- ✅ 输入验证完善
+- ⚠️ 建议：增加错误处理机制
 
 ### ✅ 状态
 
-审查成功完成。
+审查成功完成，整体代码质量良好。
 
-### 📁 分析文件
+### 📁 文件分析
 
-本次审查包含 15 个文件。
+本次审查涵盖 12 个文件：
 
-**文件类型：**
-- `.go`: 8 个文件
+**文件类型分布：**
+- `.go`: 6 个文件
 - `.md`: 3 个文件
-- `.yml`: 2 个文件
-- `.json`: 2 个文件
+- `.yaml`: 2 个文件
+- `.json`: 1 个文件
+
+### 💡 改进建议
+
+1. **main.go:45** - 建议增加错误日志记录
+2. **config/config.go:32** - 推荐使用环境变量默认值
+3. **webhook/handler.go:156** - 优化并发处理逻辑
 ```
 
-#### 日志记录
+## 系统监控
 
-应用使用 logrus 进行结构化日志记录，格式为 JSON。日志包括：
-- 接收到的 webhook 事件
-- 仓库克隆操作
-- 审查执行详情
-- API 交互结果
-- 错误信息
+### 健康检查
 
-#### 安全注意事项
-
-- 生产环境中始终使用 HTTPS
-- 保护好你的 webhook 密钥
-- 限制 GitHub 令牌的权限范围，只授予必要的权限
-- 在生产环境中考虑实施速率限制
-- 定期更新依赖项
-
-#### 故障排除
-
-**常见问题**
-
-1. **"Invalid signature" 错误**
-   - 检查 `GITHUB_WEBHOOK_SECRET` 是否与 GitHub 中的 webhook 密钥匹配
-   - 确保你在 webhook 配置中使用了正确的密钥
-
-2. **"Failed to clone repository" 错误**
-   - 检查你的 GitHub 令牌是否具有适当的仓库访问权限
-   - 验证仓库是否为公开仓库或令牌具有访问私有仓库的权限
-
-3. **"Failed to perform code review" 错误**
-   - 确保你的审查命令在系统 PATH 中可用
-   - 检查审查命令是否可以在仓库目录中执行
-   - 如果审查时间较长，请检查超时设置
-
-**健康检查**
-
-应用提供健康检查端点：
-```
-GET /health
+```bash
+curl http://localhost:8080/health
+# 响应：{"status":"ok"}
 ```
 
-返回：`{"status":"ok"}`
+### 日志系统
 
-#### 许可证
+应用采用结构化 JSON 日志：
 
-本项目采用 MIT 许可证。
+```json
+{
+  "level": "info",
+  "msg": "Starting webhook server",
+  "port": "8080",
+  "time": "2024-01-15T10:30:00Z"
+}
+```
+
+日志内容包括：
+- Webhook 事件接收记录
+- 仓库克隆操作状态
+- 审查命令执行详情
+- GitHub API 交互结果
+- 系统错误和异常信息
+
+## 安全最佳实践
+
+### 生产环境部署
+
+1. **HTTPS 加密**：使用反向代理（Nginx/Caddy）启用 SSL/TLS
+2. **密钥管理**：使用密钥管理服务存储敏感信息
+3. **权限控制**：限制 GitHub Token 权限范围
+4. **速率限制**：防止 API 滥用和 DDoS 攻击
+5. **定期更新**：保持依赖包最新版本
+
+### Docker 部署示例
+
+```dockerfile
+FROM golang:1.24-alpine AS builder
+WORKDIR /app
+COPY . .
+RUN go mod tidy && go build -o code-review .
+
+FROM alpine:latest
+RUN apk --no-cache add ca-certificates git
+WORKDIR /root/
+COPY --from=builder /app/code-review .
+EXPOSE 8080
+CMD ["./code-review"]
+```
+
+## 故障排除
+
+### 常见问题诊断
+
+**1. 签名验证失败**
+```bash
+# 检查环境变量
+echo $GITHUB_WEBHOOK_SECRET
+
+# 验证 webhook 配置
+# 确保 GitHub 仓库中的 Secret 与环境变量一致
+```
+
+**2. 仓库克隆失败**
+```bash
+# 测试 GitHub Token 权限
+curl -H "Authorization: token $GITHUB_TOKEN" \
+     https://api.github.com/user/repos
+
+# 检查仓库访问权限
+# 确保 Token 有足够权限访问目标仓库
+```
+
+**3. 审查命令执行失败**
+```bash
+# 测试审查命令
+cd /tmp/test-repo
+claude /review --dangerously-skip-permissions
+
+# 检查 Claude CLI 安装
+claude --version
+```
+
+**4. 性能优化问题**
+- 调整 `REVIEW_TIMEOUT` 参数
+- 优化审查命令复杂度
+- 考虑增加并发处理限制
+
+### 调试模式
+
+启用详细日志记录：
+
+```bash
+export LOG_LEVEL="debug"
+go run main.go
+```
+
+## 贡献指南
+
+欢迎提交 Issue 和 Pull Request！
+
+### 开发流程
+
+1. Fork 项目仓库
+2. 创建功能分支：`git checkout -b feature/new-feature`
+3. 提交更改：`git commit -m "Add new feature"`
+4. 推送分支：`git push origin feature/new-feature`
+5. 创建 Pull Request
+
+### 代码规范
+
+- 遵循 Go 官方代码规范
+- 添加必要的单元测试
+- 更新相关文档
+- 确保所有测试通过
+
+## 许可证
+
+本项目采用 **MIT 许可证**，详见 [LICENSE](LICENSE) 文件。
+
+---
+
+## 技术支持
+
+如遇问题或需要技术支持，请：
+- 提交 [GitHub Issue](https://github.com/your-username/CodeReview/issues)
+- 查看 [项目文档](https://github.com/your-username/CodeReview/wiki)
+- 联系维护团队
 </div>
 
 ---
