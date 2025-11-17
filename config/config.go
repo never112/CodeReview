@@ -34,7 +34,7 @@ func Load() (*Config, error) {
 		},
 		GitHub: GitHubConfig{
 			WebhookSecret: getEnv("GITHUB_WEBHOOK_SECRET", ""),
-			Token:         getEnv("GITHUB_TOKEN", "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"),
+			Token:         getEnv("GITHUB_TOKEN", ""),
 		},
 		Review: ReviewConfig{
 			Command: getEnv("REVIEW_COMMAND", "claude /review  review结果用中文展示,review 时候参考 /promote/review.md 文件 --dangerously-skip-permissions"),

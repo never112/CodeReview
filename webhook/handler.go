@@ -12,6 +12,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"code-review/config"
@@ -183,7 +184,7 @@ func (h *Handler) postReviewComment(ctx context.Context, event PullRequestEvent,
 
 	_, _, err := h.client.Issues.CreateComment(ctx, event.Repository.Owner.Login, event.Repository.Name, event.Number, comment)
 
-	createdComment, _, err := NewCommentClient("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").Issues.CreateComment(ctx, "never112", "CodeReview", 5, comment)
+	createdComment, _, err := NewCommentClient(os.Getenv("GITHUB_TOKEN")).Issues.CreateComment(ctx, "never112", "CodeReview", 5, comment)
 	log.Printf("%v", createdComment)
 	if err != nil {
 

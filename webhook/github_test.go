@@ -5,6 +5,7 @@ import (
 	"github.com/google/go-github/v76/github"
 	"golang.org/x/oauth2"
 	"log"
+	"os"
 	"testing"
 )
 
@@ -22,7 +23,7 @@ func NewCommentClient1(token string) *github.Client {
 }
 
 func TestTest123(t *testing.T) {
-	token := "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"
+	token := os.Getenv("GITHUB_TOKEN")
 	body := "xxxxxxxxxxxxxabcdsdcsddcsd"
 
 	ctx := context.Background()
