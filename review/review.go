@@ -52,15 +52,16 @@ func PerformCodeReview(ctx context.Context, repoDir, reviewCommand string) (stri
 	duration := time.Since(start)
 
 	logrus.WithFields(logrus.Fields{
-		"duration": duration,
-		"exit_code": cmd.ProcessState.ExitCode(),
+		"duration":       duration,
+		"Review Command": reviewCommand,
+		"exit_code":      cmd.ProcessState.ExitCode(),
 	}).Info("Code review command completed")
 
 	// Prepare the result
 	var result strings.Builder
-	result.WriteString(fmt.Sprintf("**Review Command:** `%s`\n\n", reviewCommand))
-	result.WriteString(fmt.Sprintf("**Duration:** %v\n\n", duration))
-	result.WriteString(fmt.Sprintf("**Exit Code:** %d\n\n", cmd.ProcessState.ExitCode()))
+	//result.WriteString(fmt.Sprintf("**Review Command:** `%s`\n\n", reviewCommand))
+	//result.WriteString(fmt.Sprintf("**Duration:** %v\n\n", duration))
+	//result.WriteString(fmt.Sprintf("**Exit Code:** %d\n\n", cmd.ProcessState.ExitCode()))
 
 	// Add output sections
 	if stdout.Len() > 0 {
