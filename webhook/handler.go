@@ -8,7 +8,9 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"golang.org/x/oauth2"
 	"io"
+	"log"
 	"net/http"
 	"time"
 
@@ -16,7 +18,7 @@ import (
 	"code-review/git"
 	"code-review/review"
 
-	"github.com/google/go-github/v45/github"
+	"github.com/google/go-github/v76/github"
 	"github.com/sirupsen/logrus"
 )
 
@@ -26,9 +28,9 @@ type Handler struct {
 }
 
 type PullRequestEvent struct {
-	Action      string `json:"action"`
-	Number      int    `json:"number"`
-	Repository  Repository `json:"repository"`
+	Action      string             `json:"action"`
+	Number      int                `json:"number"`
+	Repository  Repository         `json:"repository"`
 	PullRequest PullRequestPayload `json:"pull_request"`
 }
 
@@ -100,7 +102,7 @@ func (h *Handler) HandlePullRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Only handle opened and synchronized events (new commits)
-	if event.Action != "opened" && event.Action != "synchronize" {
+	if event.Action != "opened" && event.Action != "synchronize" && event.Action != "" && event.Action != "reopened" {
 		logrus.WithField("action", event.Action).Info("Ignoring PR event")
 		w.WriteHeader(http.StatusOK)
 		return
@@ -166,14 +168,25 @@ func (h *Handler) processPullRequest(event PullRequestEvent) {
 		logrus.WithError(err).Warn("Failed to cleanup repository")
 	}
 }
-
+func NewCommentClient(token string) *github.Client {
+	ctx := context.Background()
+	ts := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: token},
+	)
+	tc := oauth2.NewClient(ctx, ts)
+	return github.NewClient(tc)
+}
 func (h *Handler) postReviewComment(ctx context.Context, event PullRequestEvent, reviewResult string) error {
 	comment := &github.IssueComment{
 		Body: github.String(fmt.Sprintf("## 🤖 Code Review Results\n\n%s", reviewResult)),
 	}
 
 	_, _, err := h.client.Issues.CreateComment(ctx, event.Repository.Owner.Login, event.Repository.Name, event.Number, comment)
+
+	createdComment, _, err := NewCommentClient("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").Issues.CreateComment(ctx, "never112", "CodeReview", 5, comment)
+	log.Printf("%v", createdComment)
 	if err != nil {
+
 		return fmt.Errorf("failed to create comment: %w", err)
 	}
 
