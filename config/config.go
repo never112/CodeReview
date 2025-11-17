@@ -37,7 +37,7 @@ func Load() (*Config, error) {
 			Token:         getEnv("GITHUB_TOKEN", ""),
 		},
 		Review: ReviewConfig{
-			Command: getEnv("REVIEW_COMMAND", "claude /review  review结果用中文展示,review 时候参考 /promote/review.md 文件 --dangerously-skip-permissions"),
+			Command: getEnv("REVIEW_COMMAND", "claude /review review结果用中文展示,review 时候参考/promote/review.md文件 --dangerously-skip-permissions"),
 			Timeout: getEnvAsInt("REVIEW_TIMEOUT", 300), // 5 minutes default
 		},
 		WorkDir: getEnv("WORK_DIR", "/tmp/code-review"),

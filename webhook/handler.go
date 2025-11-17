@@ -58,7 +58,12 @@ type PullRequestCommit struct {
 
 func NewHandler(cfg *config.Config) *Handler {
 	// Use personal access token authentication
-	tc := &http.Client{}
+
+	ctx := context.Background()
+	ts := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: cfg.GitHub.Token},
+	)
+	tc := oauth2.NewClient(ctx, ts)
 	client := github.NewClient(tc)
 
 	return &Handler{
@@ -189,8 +194,8 @@ func (h *Handler) postReviewComment(ctx context.Context, event PullRequestEvent,
 
 	_, _, err := h.client.Issues.CreateComment(ctx, event.Repository.Owner.Login, event.Repository.Name, event.Number, comment)
 
-	createdComment, _, err := NewCommentClient(os.Getenv("GITHUB_TOKEN")).Issues.CreateComment(ctx, "never112", "CodeReview", 5, comment)
-	log.Printf("%v", createdComment)
+	//createdComment, _, err := NewCommentClient(os.Getenv("GITHUB_TOKEN")).Issues.CreateComment(ctx, "never112", "CodeReview", 5, comment)
+	//log.Printf("%v", createdComment)
 	if err != nil {
 
 		return fmt.Errorf("failed to create comment: %w", err)
