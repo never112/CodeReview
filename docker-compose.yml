@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  codereview:
+    build: .
+    container_name: codereview
+    volumes:
+      - ./:/workspace
+      - /root/.cache/claude:/root/.cache/claude
+    environment:
+      - CLAUDE_API_TOKEN=${CLAUDE_API_TOKEN}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+    stdin_open: true
+    tty: true
+    working_dir: /workspace
